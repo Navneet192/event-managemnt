@@ -35,7 +35,7 @@ def login(request):
     return Response({'login successfully'} , status=200)
 
 @api_view(['GET'])
-def get_usersData(request):
+def users(request):
     users = Users.objects.all()
     serializer = UsersSerializer(users , many=True)
     return Response(serializer.data)
