@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Events , Booking
+from .models import Events 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -65,33 +65,6 @@ def delete_event(request):
     event.delete()
     return Response('Event Deleted Successfully')
 
-
-@api_view(['POST'])
-def book_event(request):
-    event_name = request.data['event_name']
-    num_tickets = request.data['num_tickets']
-    event_id = request.data['event_id']
-    user = request.user
-
-    try:
-        event = Events.objects.get(event_name = event_name)
-    except Events.DoesNotExist:
-        return Response('Event not found')
-    
-    total_price = event.event_price * num_tickets
-    if event.event_capacity < num_tickets:
-        return Response('Ticket not available')
-    
-    booking = Booking.objects.create(
-        user = user,
-        events = event,
-        id = event_id,
-        num_tickets = num_tickets,
-        total_price = total_price
-    )
-    event.event_Capacity -= num_tickets
-    event.save()
-    return Response('Booking Successfull')
 
 
 

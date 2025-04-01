@@ -1,9 +1,7 @@
 from django.contrib import admin
-from .models import Events , Booking , Ticket
+from .models import Events 
 
 admin.site.register(Events)
-admin.site.register(Booking)
-admin.site.register(Ticket)
 
 
 
