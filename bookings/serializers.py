@@ -3,5 +3,9 @@ from .models import  Booking
 
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
-        models = Booking
+        model = Booking
         fields = '__all__'
+        
+
+
+

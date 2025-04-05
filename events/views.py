@@ -1,70 +1,57 @@
 from django.shortcuts import render
 from .models import Events 
-from rest_framework.decorators import api_view
+from rest_framework import viewsets
+from .serializers import EventsSerializer
 from rest_framework.response import Response
+from rest_framework import status
 
-@api_view(['POST'])
-def create_event(request):
-    event_name = request.data['event_name']
-    event_category = request.data['event_category']
-    event_date = request.data['event_date']
-    event_time = request.data['event_time']
-    event_capacity = request.data['event_capacity']
-    event_price = request.data['event_price']
-    event_location = request.data['event_location']
+class EventsViewSet(viewsets.ModelViewSet):
+    queryset = Events.objects.all()
+    serializer_class = EventsSerializer
+
+    def list(self , request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset , many=True)
+        return Response(serializer.data)
     
-    if not event_name  or not event_location or not event_category:
-        return Response('All fields are Required')
-    if Events.objects.filter(event_name = event_name , event_location = event_location , event_date = event_date , event_time = event_time).exists():
-        return Response('Event already exists')
-    event = Events.objects.create(
-        event_name = event_name,
-        event_category = event_category,
-        event_date = event_date,
-        event_time = event_time,
-        event_capacity = event_capacity,
-        event_price = event_price,
-        event_location = event_location
-    )
+    def create(self , request):
+        event_name = request.data.get('event_name')
+        event_date = request.data.get('event_date')
+        event_time = request.data.get('event_time')
+        event_location = request.data.get('event_location')
+        if Events.objects.filter(event_name=event_name , event_date=event_date , event_time=event_time , event_location=event_location).exists():
+            return Response({'message' : 'Event already exists.'} , status=400)
+        else:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data , status = 201)
+            return Response(serializer.errors , status=400)
 
-    return Response({'message' : 'Event Created Successully' , 'event_id' : event.id} , status=201)
+    def retrieve(self , request , pk=None):
+        queryset = self.get_queryset()
+        event = queryset.filter(pk=pk).first()
+        if Events.objects.filter(pk=pk).exists():
+            serializer = self.get_serializer(event)
+            return Response(serializer.data)
+        else:
+            return Response({'message' : 'Event not found.'} , status=status.HTTP_404_NOT_FOUND)
+        
+    def delete(self , request , pk=None):
+        queryset = self.get_queryset()
+        event = queryset.filter(pk=pk).first()
+        if event:
+            event.delete()
+            return Response({'Message' : 'Event deleted successfully.' } , status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'message' : 'Event not found'} , status=status.HTTP_404_NOT_FOUND)
+        
 
-@api_view(['GET'])
-def events(request):
-    events = Events.objects.all()
-    data = []
-    for event in events:
-        data.append({
-            'event_id' : event.id,
-            'event_name' : event.event_name,
-            'event_category': event.event_category,
-            'event_date' : event.event_date,
-            'event_time' : event.event_time,
-            'event_capacity' : event.event_capacity,
-            'event_location' : event.event_location,
-            'event_price' : event.event_price  
-        })
-    return Response(data)
 
-@api_view(['PUT'])
-def update_event(request):
-    event_name = request.data['event_name']
-    event_category = request.data['event_category']
-    event_price = request.data['event_price']
-    event_location = request.data['event_location']
-    event_capacity = request.data['event_capacity']
-    event_time = request.data['event_time']
-    event_date = request.data['event_date']
-
-    return Response('Event Updated Successfully')
-
-@api_view(['DELETE'])
-def delete_event(request):
-    event_id = request.data['event_id']
-    event = Events.objects.get(id = event_id)
-    event.delete()
-    return Response('Event Deleted Successfully')
+        
 
 
 
+
+    
 

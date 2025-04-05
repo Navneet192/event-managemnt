@@ -1,44 +1,36 @@
 from django.shortcuts import render
 from .models import Users
+from rest_framework import viewsets
 from .serializers import UsersSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework import status
 
+class UsersViewSet(viewsets.ModelViewSet):
+    queryset = Users.objects.all()
+    serializer_class = UsersSerializer
 
-@api_view(['POST'])
-def register(request):
-    first_name = request.data['first_name']
-    email = request.data['email']
-    password = request.data['password']
-
-    if not first_name or not email or not password:
-        return Response('fill all the required fields')
-    if Users.objects.filter(email=email).exists():
-        return Response('email already exists')
+    def list(self , request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
-    user = Users.objects.create(
-        first_name = first_name,
-        email = email,
-        password = password
-    )
-
-    return Response({"message : user registered Successfully"} , status=201)
+    def create(self , request):
+        email = request.data.get('email')
+        if Users.objects.filter(email=email).exists():
+            return Response({'error' : 'Email already exists try with different email'} , status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data , status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-@api_view(['POST'])
-def login(request):
-    email = request.data['email']
-    password = request.data['password']
+    
 
-    users = Users.objects.filter(email=email).first()
-    if not users or  users.password != password:
-        return Response('invalid password')
-    return Response({'login successfully'} , status=200)
 
-@api_view(['GET'])
-def users(request):
-    users = Users.objects.all()
-    serializer = UsersSerializer(users , many=True)
-    return Response(serializer.data)
+
+
+    
+
 
 
 

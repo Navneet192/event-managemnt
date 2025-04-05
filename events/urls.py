@@ -1,9 +1,6 @@
-from django.urls import path
-from .views import create_event , events , update_event , delete_event
-urlpatterns = [
-    path('create_event/' , create_event , name='create_event'),
-    path('events/' , events , name='events'),
-    path('update_event/' , update_event , name='update_event'),
-    path('delete_event/' , delete_event , name='delete_event'),
-]
+from rest_framework.routers import DefaultRouter
+from .views import EventsViewSet
+router = DefaultRouter()
+router.register(r'events' , EventsViewSet , basename='events')
+urlpatterns = router.urls
 

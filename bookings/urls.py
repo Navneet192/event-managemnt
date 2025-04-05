@@ -1,8 +1,14 @@
-from django.urls import path
-from .views import book_event , bookings
+from django.urls import path , include
+from rest_framework.routers import DefaultRouter
+from .views import bookingViewSet
+router = DefaultRouter()
+router.register(r'booking' , bookingViewSet , basename='booking')
+
 urlpatterns = [
-    path('book_event/' , book_event , name='book_event'),
-    path('bookings/' , bookings , name='bookings'),
-    path('bookings/<str:event_location>/' , bookings , name='booking_by_location'),
+    path('api/' , include(router.urls)),
+    # path('bookings/' , bookings , name='bookings'),
+    # path('bookings/<str:event_location>/' , bookings , name='booking_by_location'),
 ]
+
+
 

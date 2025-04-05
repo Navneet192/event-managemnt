@@ -1,7 +1,8 @@
-from django.urls import path
-from .views import register , login , users
-urlpatterns = [
-   path('register/' , register, name='register'),
-   path('login/' ,  login , name='login'),
-   path('users/' , users , name='get_usersData')
-]
+from django.urls import path , include
+from rest_framework import routers
+from .views import UsersViewSet
+router = routers.DefaultRouter()
+router.register(r'users' , UsersViewSet , basename='users')
+
+
+urlpatterns = router.urls
