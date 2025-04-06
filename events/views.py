@@ -9,6 +9,7 @@ class EventsViewSet(viewsets.ModelViewSet):
     queryset = Events.objects.all()
     serializer_class = EventsSerializer
 
+
     def list(self , request):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset , many=True)
@@ -30,12 +31,23 @@ class EventsViewSet(viewsets.ModelViewSet):
 
     def retrieve(self , request , pk=None):
         queryset = self.get_queryset()
-        event = queryset.filter(pk=pk).first()
-        if Events.objects.filter(pk=pk).exists():
-            serializer = self.get_serializer(event)
-            return Response(serializer.data)
-        else:
-            return Response({'message' : 'Event not found.'} , status=status.HTTP_404_NOT_FOUND)
+        event_category = request.query_params.get('event_category' , None)
+        if pk and  pk.isdigit():
+            event = queryset.filter(pk=pk).first()
+            if event:
+                serializer = self.get_serializer(event)
+                return Response(serializer.data)
+            else:
+                return Response({'message' : 'Event not found'} , status=400)
+        if event_category or pk:
+            category = event_category if event_category else pk
+            event = queryset.filter(event_category=category)
+            if event.exists():
+                serializer = self.get_serializer(event , many=True)
+                return Response(serializer.data)
+            else:
+                return Response({'message' : 'Event not found'} , status=400)
+        return Response({'message' : 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
         
     def delete(self , request , pk=None):
         queryset = self.get_queryset()
