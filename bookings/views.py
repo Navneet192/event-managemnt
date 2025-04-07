@@ -51,6 +51,39 @@ class bookingViewSet(viewsets.ModelViewSet):
         }
         return Response(response_data , status=201)
     
+    def retrieve(self, request, pk=None):
+        queryset = self.get_queryset()
+        if pk and pk.isdigit():
+           booking = queryset.filter(pk=pk).first()
+           if booking:
+              try:
+                 event = Events.objects.get(id=booking.event_id)
+              except Events.DoesNotExist:
+                 return Response({'error': 'Event not found'}, status=404)
+              response_data = {
+                  'booking_details': {
+                    'id': booking.id,
+                    'event_name': event.event_name,
+                    'event_location': event.event_location,
+                    'event_date': event.event_date,
+                    'contact_email': booking.contact_email,
+                    'contact_phone': booking.contact_phone,
+                    'num_tickets': booking.num_tickets,
+                    'total_price': event.event_price * booking.num_tickets,
+                }
+            }
+              return Response(response_data, status=200)
+        else:
+            return Response({'message': 'Booking not found'}, status=404)
+
+        bookings = queryset.filter(event_id=pk)
+        if bookings.exists():
+           serializer = self.get_serializer(bookings, many=True)
+           return Response(serializer.data, status=200)
+        else:
+            return Response({'message': 'No bookings found for the given event ID'}, status=404)
+
+    
      
 
 
