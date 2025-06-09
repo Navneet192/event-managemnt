@@ -1,1 +1,4 @@
-#Event management syatem using Django and React.js
+#Tiltle = Event management syatem using Django and React.js
+Description:
+
+##
