@@ -1,1 +1,1 @@
-Event management syatem using Django and React.js
+#Event management syatem using Django and React.js
